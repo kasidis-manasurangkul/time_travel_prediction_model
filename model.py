@@ -88,7 +88,7 @@ model = TravelTimePredictor()
 
 # Loss and Optimizer
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
 
 
 # In[70]:

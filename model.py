@@ -19,9 +19,9 @@ import os
 from tqdm import tqdm
 
 # Save the model
-modelPath = 'models/model2/'
+modelPath = 'models/model3/'
 # change name modle here
-model_name = 'model2.pth'
+model_name = 'model3.pth'
 
 
 # In[66]:

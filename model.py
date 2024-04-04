@@ -193,7 +193,7 @@ import matplotlib.pyplot as plt
 
 # Assuming 'losses' is a list or array containing the loss values for each epoch
 plt.figure(figsize=(12, 6))
-plt.plot(losses, label='Training Loss', color='blue', linestyle='-', marker='o')
+plt.plot(losses, label='Training Loss', color='blue', linestyle='-', marker='')
 plt.title('Training Loss Over Epochs')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')

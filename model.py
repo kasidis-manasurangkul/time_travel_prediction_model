@@ -125,7 +125,7 @@ test_loader = DataLoader(test_data, batch_size=64, shuffle=False)
 
 
 # change num_epochs here
-num_epochs = 100
+num_epochs = 25000
 losses = []
 
 # Training Loop with tqdm on the outer loop

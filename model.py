@@ -19,9 +19,9 @@ import os
 from tqdm import tqdm
 
 # Save the model
-modelPath = 'models/model1'
+modelPath = 'models/model2/'
 # change name modle here
-model_name = 'model1.pth'
+model_name = 'model2.pth'
 
 
 # In[66]:
@@ -199,6 +199,6 @@ plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
 plt.grid(True)
-plt.savefig(f"{path}/losses_{model_name[:-4]}.png")
+plt.savefig(f"{modelPath}/losses_{model_name[:-4]}.png")
 
 

@@ -19,9 +19,9 @@ import os
 from tqdm import tqdm
 
 # Save the model
-modelPath = 'models/model2/'
+modelPath = 'models/model3/'
 # change name modle here
-model_name = 'model2.pth'
+model_name = 'model3.pth'
 
 
 # In[66]:
@@ -88,7 +88,7 @@ model = TravelTimePredictor()
 
 # Loss and Optimizer
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
 
 
 # In[70]:
@@ -125,7 +125,7 @@ test_loader = DataLoader(test_data, batch_size=64, shuffle=False)
 
 
 # change num_epochs here
-num_epochs = 100
+num_epochs = 25000
 losses = []
 
 # Training Loop with tqdm on the outer loop
@@ -193,7 +193,7 @@ import matplotlib.pyplot as plt
 
 # Assuming 'losses' is a list or array containing the loss values for each epoch
 plt.figure(figsize=(12, 6))
-plt.plot(losses, label='Training Loss', color='blue', linestyle='-', marker='o')
+plt.plot(losses, label='Training Loss', color='blue', linestyle='-', marker='')
 plt.title('Training Loss Over Epochs')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')

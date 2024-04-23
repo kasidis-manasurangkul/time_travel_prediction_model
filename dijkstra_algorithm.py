@@ -80,7 +80,7 @@ def plot_graph(adjacency_matrix, node_mapping, path=None):
 
     plt.xlabel('Longitude')
     plt.ylabel('Latitude')
-    plt.title('Graph Visualization')
+    plt.title('Dijsktra Algorithm with Neural Network Travel Time Prediction')
     plt.grid(True)
     plt.show()
 
@@ -149,7 +149,7 @@ adjacency_matrix, node_mapping = load_adjacency_matrix_from_csv(file_path)
 
 # Assuming adjacency_matrix and node_mapping have been loaded
 start_node = '0'  # Example starting node ID
-end_node = '148'   # Example ending node ID
+end_node = '258'   # Example ending node ID
 
 # Perform Dijkstra's algorithm
 min_times, path_distances, previous_nodes = dijkstra_algorithm(adjacency_matrix, node_mapping, start_node)

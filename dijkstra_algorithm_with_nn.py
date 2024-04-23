@@ -239,9 +239,14 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load(model_path))
     while True:
         start_node = input("Enter the start node <type exit to stop>: ")
-        end_node = input("Enter the end node <type exit to stop>: ")
-        if start_node == 'exit' or end_node == 'exit':
+        if start_node == 'exit':
             break
+        end_node = input("Enter the end node <type exit to stop>: ")
+        if start_node == 'exit':
+            break
+        if start_node not in node_mapping or end_node not in node_mapping:
+            print("Invalid node names. Please try again.")
+            continue
         # Perform algorithms
         min_times_raw, path_distances_raw, previous_nodes_raw = dijkstra_algorithm(adjacency_matrix, node_mapping, start_node)
         path_raw = reconstruct_path(previous_nodes_raw, node_mapping, start_node, end_node)

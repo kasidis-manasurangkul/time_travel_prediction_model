@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import heapq
 import torch
 import torch.nn as nn
+import random
 
 # Neural Network Model architecture
 class EnhancedTravelTimePredictor(nn.Module):
@@ -73,24 +74,29 @@ args:
     adjacency_matrix: list[list[str]] - adjacency matrix with edge details
     node_mapping: dict{str: int} - mapping of node names to indices
     start_node: str - starting node for the algorithm
+    end_node: str - ending node for the algorithm
     model: EnhancedTravelTimePredictor - neural network model for travel time prediction
 returns:
-    min_times: list[float] - minimum travel times to each node
-    path_distances: list[float] - total distances to each node
-    previous_nodes: list[int] - previous node indices for each node
+    min_time: float - minimum travel time to the end node
+    path_distance: float - total distance to the end node
+    path: list[str] - shortest path from start to end node
+    total_edge_time: float - total edge time used along the shortest path
 '''
-def dijkstra_algorithm(adjacency_matrix, node_mapping, start_node, model=None):
+def dijkstra_algorithm(adjacency_matrix, node_mapping, start_node, end_node, model=None):
     start_index = node_mapping[start_node]
+    end_index = node_mapping[end_node]
     num_nodes = len(adjacency_matrix)
     min_times = [float('inf')] * num_nodes
     min_times[start_index] = 0
     path_distances = [0] * num_nodes
     priority_queue = [(0, start_index)]
     previous_nodes = [-1] * num_nodes
+    total_edge_time = 0
 
     while priority_queue:
         current_time, current_index = heapq.heappop(priority_queue)
-
+        if current_index == end_index:
+            break  # Reached the destination node, exit the loop
         if current_time > min_times[current_index]:
             continue
 
@@ -125,34 +131,19 @@ def dijkstra_algorithm(adjacency_matrix, node_mapping, start_node, model=None):
                     previous_nodes[neighbor_index] = current_index
                     heapq.heappush(priority_queue, (total_time, neighbor_index))
 
-    return min_times, path_distances, previous_nodes
-
-'''
-Function to reconstruct the path from the previous nodes
-args:
-    previous_nodes: list[int] - previous node indices for each node
-    node_mapping: dict{str: int} - mapping of node names to indices
-    start_node: str - starting node
-    end_node: str - ending node
-returns:
-    path: list[str] - reconstructed path
-'''
-def reconstruct_path(previous_nodes, node_mapping, start_node, end_node):
-    if end_node not in node_mapping:
-        return "End node not found in the graph."
-
+    # Reconstruct the shortest path and calculate the total edge time used
     path = []
-    current_node_index = node_mapping[end_node]
-    while current_node_index != -1:
-        current_node = list(node_mapping.keys())[list(node_mapping.values()).index(current_node_index)]
-        path.append(current_node)
-        current_node_index = previous_nodes[current_node_index]
-
+    current_node = end_index
+    while current_node != -1:
+        path.append(list(node_mapping.keys())[list(node_mapping.values()).index(current_node)])
+        if previous_nodes[current_node] != -1:
+            edge_data = adjacency_matrix[previous_nodes[current_node]][current_node]
+            edge_details = json.loads(edge_data)
+            total_edge_time += edge_details['Time']
+        current_node = previous_nodes[current_node]
     path.reverse()
-    if path[0] == start_node:
-        return path
-    else:
-        return "No path found."
+
+    return min_times[end_index], path_distances[end_index], path, total_edge_time
 
 '''
 Function to plot the graph with the path
@@ -228,6 +219,37 @@ def plot_single_graph(adjacency_matrix, node_mapping, path, title):
     plt.title(title)
     plt.grid(True)
 
+
+def test_random_pairs(adjacency_matrix, node_mapping, num_pairs, model):
+    actual_times = []
+    predicted_times = []
+
+    for _ in range(num_pairs):
+        start_node, end_node = random.sample(list(node_mapping.keys()), 2)
+        
+        min_time_raw, _, _, _ = dijkstra_algorithm(adjacency_matrix, node_mapping, start_node, end_node)
+        min_time_model, _, _, _ = dijkstra_algorithm(adjacency_matrix, node_mapping, start_node, end_node, model)
+        
+        actual_times.append(min_time_raw)
+        predicted_times.append(min_time_model)
+
+    # Plot the graph comparing actual and predicted times
+    plt.figure(figsize=(8, 6))
+    plt.scatter(actual_times, predicted_times, color='blue', alpha=0.5)
+    plt.plot([min(actual_times), max(actual_times)], [min(actual_times), max(actual_times)], color='red', linestyle='--')
+    plt.xlabel('Actual Minimum Time')
+    plt.ylabel('Model-Predicted Minimum Time')
+    plt.title('Comparison of Actual and Model-Predicted Minimum Times')
+    plt.grid(True)
+    plt.show()
+
+    # Calculate the average error
+    errors = [abs(actual - predicted) for actual, predicted in zip(actual_times, predicted_times)]
+    avg_error = sum(errors) / len(errors)
+    print(f"Average Error: {avg_error:.2f}")
+    print(f'Average actual time: {sum(actual_times) / len(actual_times):.2f}')
+
+
 # Main Execution
 if __name__ == "__main__":
     # Your setup code here
@@ -248,13 +270,11 @@ if __name__ == "__main__":
             print("Invalid node names. Please try again.")
             continue
         # Perform algorithms
-        min_times_raw, path_distances_raw, previous_nodes_raw = dijkstra_algorithm(adjacency_matrix, node_mapping, start_node)
-        path_raw = reconstruct_path(previous_nodes_raw, node_mapping, start_node, end_node)
-
-        min_times_model, path_distances_model, previous_nodes_model = dijkstra_algorithm(adjacency_matrix, node_mapping, start_node, model)
-        path_model = reconstruct_path(previous_nodes_model, node_mapping, start_node, end_node)
+        min_time_raw, path_distance_raw, path_raw, total_edge_time_raw = dijkstra_algorithm(adjacency_matrix, node_mapping, start_node, end_node)
+        min_time_model, path_distance_model, path_model, total_edge_time_model = dijkstra_algorithm(adjacency_matrix, node_mapping, start_node, end_node, model)
 
         # Output and plotting
-        print("Raw Dijkstra - Minimum time:", min_times_raw[node_mapping[end_node]], "Total distance:", path_distances_raw[node_mapping[end_node]])
-        print("Model-based Dijkstra - Minimum time:", min_times_model[node_mapping[end_node]], "Total distance:", path_distances_model[node_mapping[end_node]])
+        print("Raw Dijkstra - Minimum time:", min_time_raw, "Total distance:", path_distance_raw, "Total edge time used:", total_edge_time_raw)
+        print("Model-based Dijkstra - Minimum time:", min_time_model, "Total distance:", path_distance_model, "Total edge time used:", total_edge_time_model)
         plot_graph(adjacency_matrix, node_mapping, path_raw, path_model, f"Raw Dijkstra Algorithm Travel Time Prediction from {start_node} to {end_node}", f"Dijkstra Algorithm with Neural Network Travel Time Prediction from {start_node} to {end_node}")
+    # test_random_pairs(adjacency_matrix, node_mapping, 500, model)

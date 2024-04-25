@@ -5,6 +5,7 @@ import heapq
 import torch
 import torch.nn as nn
 import random
+import sys
 
 # Neural Network Model architecture
 class EnhancedTravelTimePredictor(nn.Module):
@@ -38,12 +39,16 @@ returns:
 '''
 def load_adjacency_matrix_from_csv(file_path):
     nodes = set()
-    with open(file_path, newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            nodes.add(row['Node_Start'])
-            nodes.add(row['Node_End'])
+    try:
+        with open(file_path, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                nodes.add(row['Node_Start'])
+                nodes.add(row['Node_End'])
 
+    except FileNotFoundError:
+        print("File not found. Please provide a valid file path.")
+        sys.exit(1)
     node_to_index = {node: i for i, node in enumerate(sorted(nodes))}
     size = len(nodes)
     adjacency_matrix = [[None for _ in range(size)] for _ in range(size)]
@@ -252,8 +257,11 @@ def test_random_pairs(adjacency_matrix, node_mapping, num_pairs, model):
 
 # Main Execution
 if __name__ == "__main__":
-    # Your setup code here
-    file_path = './ChengDuData/Weekday_Peak.csv'
+    # ask for the file path in args
+    if len(sys.argv) < 2:
+        print("Please provide the file path as an argument.")
+        sys.exit(1)
+    file_path = sys.argv[1]
     adjacency_matrix, node_mapping = load_adjacency_matrix_from_csv(file_path)
 
     model_path = 'models/model4/model4.pth'
@@ -264,7 +272,7 @@ if __name__ == "__main__":
         if start_node == 'exit':
             break
         end_node = input("Enter the end node <type exit to stop>: ")
-        if start_node == 'exit':
+        if end_node == 'exit':
             break
         if start_node not in node_mapping or end_node not in node_mapping:
             print("Invalid node names. Please try again.")
